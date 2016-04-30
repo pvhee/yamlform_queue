@@ -7,16 +7,9 @@
 
 namespace Drupal\yamlform_queue\Plugin\YamlFormHandler;
 
-use Drupal\Component\Utility\Xss;
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Mail\MailManagerInterface;
 use Drupal\Core\Queue\QueueFactory;
-use Drupal\Core\Queue\QueueInterface;
-use Drupal\Core\Render\Markup;
-use Drupal\Core\Utility\Token;
-use Drupal\file\Entity\File;
 use Drupal\yamlform\YamlFormHandlerBase;
 use Drupal\yamlform\YamlFormHandlerMessageInterface;
 use Drupal\yamlform\YamlFormSubmissionInterface;
