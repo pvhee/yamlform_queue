@@ -168,6 +168,15 @@ class QueueYamlFormHandler extends YamlFormHandlerBase implements YamlFormHandle
   /**
    * {@inheritdoc}
    */
+  public function getSummary() {
+    return [
+      '#markup' => t('Queue: %queue', ['%queue' => $this->configuration['queue_name']]),
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function postSave(YamlFormSubmissionInterface $yamlform_submission, $update = TRUE) {
     if ($yamlform_submission->getState() == YamlFormSubmissionInterface::STATE_COMPLETED) {
       $message = $this->getMessage($yamlform_submission);
