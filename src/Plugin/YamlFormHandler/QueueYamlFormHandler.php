@@ -133,8 +133,9 @@ class QueueYamlFormHandler extends YamlFormHandlerBase implements YamlFormHandle
       '#open' => TRUE,
     ];
     $form['settings']['queue_name'] = [
-      '#type' => 'textfield',
+      '#type' => 'yamlform_codemirror_text',
       '#title' => $this->t('Queue name'),
+      '#description' => $this->t('The machine name of the queue to use. The queue will be created if it does not exist yet.'),
       '#default_value' => $this->configuration['queue_name'],
     ];
 
