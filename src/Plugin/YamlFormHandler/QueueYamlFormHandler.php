@@ -8,6 +8,7 @@
 namespace Drupal\yamlform_queue\Plugin\YamlFormHandler;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityStorageException;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Queue\QueueFactory;
 use Drupal\yamlform\YamlFormHandlerBase;
@@ -18,12 +19,12 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Emails a YAML form submission.
+ * Send a YAML form submission to a queue.
  *
  * @YamlFormHandler(
  *   id = "queue",
  *   label = @Translation("Queue"),
- *   description = @Translation("Submits submissions to a queue"),
+ *   description = @Translation("Sends form submissions to a queue"),
  *   cardinality = \Drupal\yamlform\YamlFormHandlerInterface::CARDINALITY_UNLIMITED,
  *   results = \Drupal\yamlform\YamlFormHandlerInterface::RESULTS_PROCESSED,
  * )
@@ -94,16 +95,31 @@ class QueueYamlFormHandler extends YamlFormHandlerBase implements YamlFormHandle
    * {@inheritdoc}
    */
   public function sendMessage(array $message) {
+    try {
+      // Create a queue
+      $queue = $this->queueFactory->get($this->configuration['queue_name']);
 
-    // @todo parametrize this queue name
-    $queue_name = 'queue1';
-    $queue = $this->queueFactory->get($queue_name);
-    $queue->createItem($message);
+      // Send the message
+      $queue->createItem($message);
 
-    $variables = [
-      '@queue' => $queue_name,
-    ];
-    \Drupal::logger('yamlform.queue')->notice('Data package sent to queue @queue', $variables);
+      // Log message
+      $variables = [
+        '@queue' => $this->configuration['queue_name'],
+        '@data' => implode(',', $message),
+      ];
+
+      \Drupal::logger('yamlform.queue')->notice('Data package sent to queue @queue', $variables);
+
+      // Debug by displaying onscreen.
+      if ($this->configuration['debug']) {
+        $output = $this->t('Following data has been sent to queue @queue: @data', $variables);
+        drupal_set_message($output, 'info');
+      }
+    }
+    // @todo fix exception catching
+    catch (EntityStorageException $e) {
+      watchdog_exception('yamlform.queue', $e);
+    }
   }
 
   /**
