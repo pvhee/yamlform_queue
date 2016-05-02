@@ -73,7 +73,7 @@ class QueueYamlFormHandler extends YamlFormHandlerBase implements YamlFormHandle
    */
   public function defaultConfiguration() {
     return [
-      'queue' => '',
+      'queue_name' => '',
       'debug' => FALSE,
     ];
   }
@@ -113,7 +113,7 @@ class QueueYamlFormHandler extends YamlFormHandlerBase implements YamlFormHandle
       // Debug by displaying onscreen.
       if ($this->configuration['debug']) {
         $output = $this->t('Following data has been sent to queue @queue: @data', $variables);
-        drupal_set_message($output, 'info');
+        drupal_set_message($output, 'warning');
       }
     }
     // @todo fix exception catching
@@ -123,10 +123,27 @@ class QueueYamlFormHandler extends YamlFormHandlerBase implements YamlFormHandle
   }
 
   /**
+   * Get queue configuration values.
+   *
+   * @return array
+   *   An associative array containing queue configuration values.
+   */
+  protected function getQueueConfiguration() {
+    $configuration = $this->getConfiguration();
+    $settings = $configuration['settings'];
+
+    // Get queue so we can check the queue type
+    $queue = $this->queueFactory->get($this->configuration['queue_name']);
+    $settings['queue_class'] = get_class($queue);
+
+    return $settings;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function resendMessageForm(array $message) {
-    // @todo implement this, is this needed?
+    // @todo implement resending, currently not allowed.
   }
 
   /**
@@ -186,8 +203,8 @@ class QueueYamlFormHandler extends YamlFormHandlerBase implements YamlFormHandle
    */
   public function getSummary() {
     return [
-      '#markup' => t('Queue: %queue', ['%queue' => $this->configuration['queue_name']]),
-    ];
+      '#settings' => $this->getQueueConfiguration(),
+    ] + parent::getSummary();
   }
 
   /**
